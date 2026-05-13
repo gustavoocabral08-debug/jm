@@ -1,0 +1,760 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>JM Veículos - Concessionária</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        .cinzel-text {
+            font-family: 'Cinzel', serif;
+        }
+        
+        .toast {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: #10b981;
+            color: white;
+            padding: 12px 24px;
+            border-radius: 8px;
+            animation: slideIn 0.3s ease;
+            z-index: 1000;
+        }
+        
+        @keyframes slideIn {
+            from { transform: translateX(100%); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+        
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.5);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+        }
+        
+        .modal-content {
+            background: white;
+            border-radius: 12px;
+            max-width: 700px;
+            width: 90%;
+            max-height: 85vh;
+            overflow-y: auto;
+            padding: 24px;
+        }
+        
+        .dark-mode {
+            background-color: #0f172a !important;
+            color: #e2e8f0 !important;
+        }
+        
+        .dark-mode .bg-white {
+            background-color: #1e293b !important;
+        }
+        
+        .dark-mode .bg-gray-50 {
+            background-color: #0f172a !important;
+        }
+        
+        .dark-mode .bg-gray-100 {
+            background-color: #1e293b !important;
+        }
+        
+        .dark-mode .bg-gray-200 {
+            background-color: #334155 !important;
+        }
+        
+        .dark-mode .text-gray-800 {
+            color: #f1f5f9 !important;
+        }
+        
+        .dark-mode .text-gray-600 {
+            color: #cbd5e1 !important;
+        }
+        
+        .dark-mode .text-gray-500 {
+            color: #94a3b8 !important;
+        }
+        
+        .dark-mode .text-gray-700 {
+            color: #cbd5e1 !important;
+        }
+        
+        .dark-mode .border {
+            border-color: #334155 !important;
+        }
+        
+        .dark-mode .border-t {
+            border-color: #334155 !important;
+        }
+        
+        .dark-mode .shadow-lg {
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.3);
+        }
+        
+        .dark-mode .modal-content {
+            background-color: #1e293b !important;
+            color: #e2e8f0 !important;
+        }
+        
+        .dark-mode input, .dark-mode select, .dark-mode textarea {
+            background-color: #0f172a !important;
+            border-color: #334155 !important;
+            color: #e2e8f0 !important;
+        }
+        
+        .dark-mode input::placeholder, .dark-mode textarea::placeholder {
+            color: #64748b !important;
+        }
+        
+        .dark-mode .bg-blue-50 {
+            background-color: #1e3a8a !important;
+        }
+        
+        .dark-mode .bg-green-50 {
+            background-color: #064e3b !important;
+        }
+        
+        .dark-mode .bg-gray-200 {
+            background-color: #334155 !important;
+            color: #e2e8f0 !important;
+        }
+        
+        .dark-mode .bg-gray-200.text-gray-700 {
+            color: #e2e8f0 !important;
+        }
+        
+        .dark-mode button.bg-gray-200 {
+            color: #e2e8f0 !important;
+        }
+        
+        button { cursor: pointer; transition: all 0.2s; }
+        button:hover { transform: translateY(-2px); }
+        
+        .vehicle-card {
+            transition: transform 0.3s, box-shadow 0.3s;
+            background: white;
+        }
+        
+        .dark-mode .vehicle-card {
+            background: #1e293b !important;
+        }
+        
+        .vehicle-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1);
+        }
+        
+        .vehicle-image {
+            width: 100%;
+            height: 250px;
+            object-fit: cover;
+        }
+        
+        .gallery-image {
+            width: 100%;
+            height: 450px;
+            object-fit: cover;
+        }
+        
+        .thumbnail {
+            width: 80px;
+            height: 80px;
+            object-fit: cover;
+            cursor: pointer;
+            border-radius: 8px;
+            border: 2px solid transparent;
+            transition: all 0.2s;
+        }
+        
+        .thumbnail:hover {
+            transform: scale(1.05);
+        }
+        
+        .thumbnail.active {
+            border-color: #3b82f6;
+            transform: scale(1.05);
+        }
+        
+        .brand-btn {
+            transition: all 0.2s;
+        }
+        
+        .brand-btn:hover {
+            transform: scale(1.05);
+        }
+        
+        .preview-image {
+            width: 100px;
+            height: 100px;
+            object-fit: cover;
+            border-radius: 8px;
+        }
+        
+        .gallery-preview {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+            gap: 10px;
+            margin-top: 10px;
+        }
+        
+        .gallery-item {
+            position: relative;
+        }
+        
+        .remove-image-btn {
+            position: absolute;
+            top: -8px;
+            right: -8px;
+            background: #ef4444;
+            color: white;
+            border-radius: 50%;
+            width: 24px;
+            height: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: bold;
+            transition: all 0.2s;
+        }
+        
+        .remove-image-btn:hover {
+            background: #dc2626;
+            transform: scale(1.1);
+        }
+        
+        .hero-section {
+            position: relative;
+            background-image: url('https://images.unsplash.com/photo-1494976388531-d1058494cdd8?w=1600&h=600&fit=crop');
+            background-size: cover;
+            background-position: center;
+        }
+        
+        .hero-section::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(135deg, rgba(0,0,0,0.6) 0%, rgba(0,0,0,0.4) 100%);
+        }
+        
+        .hero-content {
+            position: relative;
+            z-index: 2;
+        }
+        
+        .add-image-btn {
+            background: #3b82f6;
+            color: white;
+            padding: 8px 16px;
+            border-radius: 8px;
+            margin-top: 10px;
+            display: inline-block;
+            cursor: pointer;
+        }
+        
+        .add-image-btn:hover {
+            background: #2563eb;
+        }
+    </style>
+</head>
+<body class="bg-gray-50">
+
+<div id="app"></div>
+
+<script>
+    // Lista de marcas
+    const MARCAS = ["Chevrolet", "Volkswagen", "Peugeot", "Toyota", "Fiat", "Renault", "Ford", "Honda", "Hyundai", "Jeep", "Nissan", "Citroen"];
+    
+    // Estado
+    let currentPage = 'home';
+    let isDarkMode = false;
+    let selectedMarca = 'todas';
+    let filterStatus = 'todos';
+    let selectedVehicle = null;
+    let toastMessage = null;
+    let isAdmin = false;
+    let showLoginModal = false;
+    let showVehicleModal = false;
+    let editingVehicle = null;
+    let currentImageIndex = 0;
+    
+    // Credenciais
+    const ADMIN_EMAIL = 'admin@jmveiculos.com';
+    const ADMIN_PASSWORD = '245464Jm<becs$';
+    
+    // Carregar dados do localStorage ou usar dados iniciais
+    let vehicles = [];
+    
+    function initData() {
+        const saved = localStorage.getItem('jm_vehicles');
+        if (saved && JSON.parse(saved).length > 0) {
+            vehicles = JSON.parse(saved);
+        } else {
+            vehicles = [
+                { id: 1, nome: "Onix Turbo", marca: "Chevrolet", ano: 2023, preco: 85000, km: 15000, combustivel: "Flex", cambio: "Automático", cor: "Prata", status: "disponível", imagens: ["https://images.unsplash.com/photo-1603584173870-7e23fae7297c?w=800&h=450&fit=crop"], descricao: "Onix LT 1.0 Turbo, completo, econômico." },
+                { id: 2, nome: "Golf GTI", marca: "Volkswagen", ano: 2022, preco: 165000, km: 35000, combustivel: "Gasolina", cambio: "Automático", cor: "Preto", status: "disponível", imagens: ["https://images.unsplash.com/photo-1568605114967-8130f6a7a7c7?w=800&h=450&fit=crop"], descricao: "Golf GTI 2.0 TSI, bancos de couro." },
+                { id: 3, nome: "Corolla XEI", marca: "Toyota", ano: 2022, preco: 135000, km: 28000, combustivel: "Flex", cambio: "CVT", cor: "Branco", status: "reservado", imagens: ["https://images.unsplash.com/photo-1621135802920-133df287f89c?w=800&h=450&fit=crop"], descricao: "Corolla XEI completo, bancos de couro." },
+                { id: 4, nome: "Hilux SRV", marca: "Toyota", ano: 2021, preco: 220000, km: 35000, combustivel: "Diesel", cambio: "Automático", cor: "Prata", status: "disponível", imagens: ["https://images.unsplash.com/photo-1620885019235-bbe289f0ac00?w=800&h=450&fit=crop"], descricao: "Hilux 4x4, capota marítima." },
+                { id: 5, nome: "Civic EXL", marca: "Honda", ano: 2020, preco: 110000, km: 45000, combustivel: "Flex", cambio: "Automático", cor: "Preto", status: "vendido", imagens: ["https://images.unsplash.com/photo-1590362891991-f776e747a588?w=800&h=450&fit=crop"], descricao: "Civic EXL, único dono." }
+            ];
+            saveData();
+        }
+    }
+    
+    function saveData() {
+        localStorage.setItem('jm_vehicles', JSON.stringify(vehicles));
+        localStorage.setItem('jm_admin', isAdmin);
+        localStorage.setItem('jm_darkMode', isDarkMode);
+    }
+    
+    function loadData() {
+        const savedAdmin = localStorage.getItem('jm_admin');
+        const savedDarkMode = localStorage.getItem('jm_darkMode');
+        isAdmin = savedAdmin === 'true';
+        isDarkMode = savedDarkMode === 'true';
+        initData();
+    }
+    
+    function showToast(msg, isError = false) {
+        toastMessage = { text: msg, isError };
+        render();
+        setTimeout(() => { toastMessage = null; render(); }, 3000);
+    }
+    
+    function toggleTheme() {
+        isDarkMode = !isDarkMode;
+        saveData();
+        render();
+    }
+    
+    function handleLogin(email, pass) {
+        if (email === ADMIN_EMAIL && pass === ADMIN_PASSWORD) {
+            isAdmin = true;
+            showLoginModal = false;
+            currentPage = 'admin';
+            saveData();
+            showToast('Login realizado com sucesso!');
+            render();
+        } else {
+            showToast('Credenciais inválidas!', true);
+        }
+    }
+    
+    function handleLogout() {
+        isAdmin = false;
+        currentPage = 'home';
+        saveData();
+        showToast('Logout realizado');
+        render();
+    }
+    
+    function handleDeleteVehicle(id) {
+        if (confirm('Tem certeza que deseja excluir este veículo?')) {
+            vehicles = vehicles.filter(v => v.id !== id);
+            saveData();
+            showToast('Veículo excluído com sucesso!');
+            render();
+        }
+    }
+    
+    function handleContact(vehicle) {
+        showToast(`Interesse registrado em ${vehicle.nome}! Entraremos em contato em breve.`);
+    }
+    
+    function formatPrice(p) {
+        return 'R$ ' + p.toLocaleString('pt-BR');
+    }
+    
+    function getStatusColor(s) {
+        if (s === 'disponível') return 'bg-green-500';
+        if (s === 'reservado') return 'bg-yellow-500';
+        return 'bg-red-500';
+    }
+    
+    // Funções de filtro globais
+    window.selectMarca = function(marca) {
+        selectedMarca = marca;
+        render();
+    };
+    
+    window.updateFilter = function(status) {
+        filterStatus = status;
+        render();
+    };
+    
+    // Renderização
+    function render() {
+        const app = document.getElementById('app');
+        if (!app) return;
+        
+        if (isDarkMode) document.body.classList.add('dark-mode');
+        else document.body.classList.remove('dark-mode');
+        
+        let html = `
+            <div class="min-h-screen flex flex-col">
+                <nav class="bg-white shadow-md sticky top-0 z-50" style="${isDarkMode ? 'background:#1e293b !important' : ''}">
+                    <div class="container mx-auto px-4">
+                        <div class="flex justify-between items-center h-16">
+                            <div class="flex items-center gap-2 cursor-pointer" onclick="window.changePage('home')">
+                                <span class="text-2xl font-bold"><span style="color: #3b82f6;">JM</span> <span style="color: ${isDarkMode ? '#cbd5e1' : '#6b7280'};">VEÍCULOS</span></span>
+                            </div>
+                            <div class="flex items-center gap-4">
+                                <button onclick="window.changePage('home')" class="px-3 py-2 rounded text-sm font-medium flex items-center gap-2 ${currentPage === 'home' ? 'bg-blue-500 text-white' : 'hover:bg-gray-100'}">
+                                    <span>🏠</span> Home
+                                </button>
+                                <button onclick="window.changePage('vehicles')" class="px-3 py-2 rounded text-sm font-medium ${currentPage === 'vehicles' ? 'bg-blue-500 text-white' : 'hover:bg-gray-100'}">
+                                    Veículos
+                                </button>
+                                ${isAdmin ? `
+                                    <button onclick="window.changePage('admin')" class="px-3 py-2 rounded text-sm font-medium ${currentPage === 'admin' ? 'bg-blue-500 text-white' : 'hover:bg-gray-100'}">Admin</button>
+                                    <button onclick="handleLogout()" class="px-3 py-2 rounded text-sm bg-red-500 text-white">Sair</button>
+                                ` : `
+                                    <button onclick="window.showLogin()" class="px-3 py-2 rounded text-sm bg-blue-500 text-white">Admin</button>
+                                `}
+                                <button onclick="toggleTheme()" class="p-2 rounded hover:bg-gray-100">${isDarkMode ? '☀️' : '🌙'}</button>
+                            </div>
+                        </div>
+                    </div>
+                </nav>
+                <div class="flex-grow">
+        `;
+        
+        if (currentPage === 'home') {
+            const destaques = vehicles.filter(v => v.status === 'disponível').slice(0, 3);
+            html += `
+                <div class="hero-section">
+                    <div class="absolute inset-0 bg-black bg-opacity-50"></div>
+                    <div class="relative z-10 container mx-auto px-4 py-24 text-center">
+                        <h1 class="cinzel-text text-5xl md:text-7xl font-bold text-white mb-6">
+                            Potência, estilo e confiança<br>na sua garagem
+                        </h1>
+                        <p class="text-xl text-gray-200 mb-8">As melhores ofertas com garantia de procedência</p>
+                        <button onclick="window.changePage('vehicles')" class="bg-blue-600 hover:bg-blue-700 text-white px-8 py-3 rounded-lg font-semibold text-lg transition transform hover:scale-105">
+                            Ver Ofertas
+                        </button>
+                    </div>
+                </div>
+                <div class="container mx-auto px-4 py-16">
+                    <h2 class="text-3xl font-bold text-center mb-12">Veículos em Destaque</h2>
+                    <div class="grid md:grid-cols-3 gap-8">
+                        ${destaques.map(v => `
+                            <div class="vehicle-card rounded-xl shadow-lg overflow-hidden">
+                                <img src="${v.imagens[0]}" class="vehicle-image" onerror="this.src='https://placehold.co/500x300?text=Sem+Imagem'">
+                                <div class="p-5">
+                                    <h3 class="text-xl font-semibold">${v.nome}</h3>
+                                    <p class="text-gray-600">${v.marca} - ${v.ano}</p>
+                                    <p class="text-blue-600 text-2xl font-bold mt-2">${formatPrice(v.preco)}</p>
+                                    <button onclick="window.viewDetail(${v.id})" class="w-full mt-4 bg-blue-500 text-white py-2 rounded hover:bg-blue-600 transition">
+                                        Ver Detalhes
+                                    </button>
+                                </div>
+                            </div>
+                        `).join('')}
+                    </div>
+                </div>
+                <div class="py-16" style="background:${isDarkMode ? '#1e293b' : '#f3f4f6'}">
+                    <div class="container mx-auto px-4">
+                        <div class="flex flex-col md:flex-row items-center justify-between gap-8">
+                            <div class="md:w-1/2 text-center md:text-left">
+                                <h2 class="text-3xl font-bold mb-4">🔑 Pronto para começar?</h2>
+                                <p class="text-lg mb-4">Com a JM Veículos, você está a um passo de realizar o sonho do carro próprio. Financiamento facilitado e aprovação rápida.</p>
+                                <button onclick="window.changePage('vehicles')" class="mt-4 bg-green-600 text-white px-6 py-2 rounded-lg hover:bg-green-700 transition">Quero meu carro</button>
+                            </div>
+                            <div class="md:w-1/2 flex justify-center">
+                                <img src="https://images.unsplash.com/photo-1580273916550-e323be2ae537?w=500&h=400&fit=crop" alt="Chave na ignição" class="rounded-xl shadow-lg w-96 h-64 object-cover">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+        else if (currentPage === 'vehicles') {
+            let filtered = vehicles;
+            if (selectedMarca !== 'todas') {
+                filtered = filtered.filter(v => v.marca === selectedMarca);
+            }
+            if (filterStatus !== 'todos') {
+                filtered = filtered.filter(v => v.status === filterStatus);
+            }
+            
+            html += `
+                <div class="container mx-auto px-4 py-8">
+                    <h1 class="text-3xl font-bold mb-8">Catálogo de Veículos</h1>
+                    
+                    <div class="mb-6">
+                        <label class="block text-sm font-medium mb-2">Filtrar por Marca:</label>
+                        <div class="flex flex-wrap gap-2">
+                            <button onclick="window.selectMarca('todas')" class="brand-btn px-4 py-2 rounded-lg transition ${selectedMarca === 'todas' ? 'bg-blue-500 text-white' : 'bg-gray-200'}">Todas</button>
+                            ${MARCAS.map(m => `<button onclick="window.selectMarca('${m}')" class="brand-btn px-4 py-2 rounded-lg transition ${selectedMarca === m ? 'bg-blue-500 text-white' : 'bg-gray-200'}">${m}</button>`).join('')}
+                        </div>
+                    </div>
+                    
+                    <div class="mb-6">
+                        <label class="block text-sm font-medium mb-2">Filtrar por Status:</label>
+                        <div class="flex flex-wrap gap-2">
+                            <button onclick="window.updateFilter('todos')" class="px-4 py-2 rounded-lg transition ${filterStatus === 'todos' ? 'bg-blue-500 text-white' : 'bg-gray-200'}">Todos</button>
+                            <button onclick="window.updateFilter('disponível')" class="px-4 py-2 rounded-lg transition ${filterStatus === 'disponível' ? 'bg-green-500 text-white' : 'bg-gray-200'}">Disponíveis</button>
+                            <button onclick="window.updateFilter('reservado')" class="px-4 py-2 rounded-lg transition ${filterStatus === 'reservado' ? 'bg-yellow-500 text-white' : 'bg-gray-200'}">Reservados</button>
+                            <button onclick="window.updateFilter('vendido')" class="px-4 py-2 rounded-lg transition ${filterStatus === 'vendido' ? 'bg-red-500 text-white' : 'bg-gray-200'}">Vendidos</button>
+                        </div>
+                    </div>
+                    
+                    <div class="mb-4 text-sm">Mostrando ${filtered.length} de ${vehicles.length} veículos</div>
+                    
+                    <div class="grid md:grid-cols-3 gap-6">
+                        ${filtered.map(v => `
+                            <div class="vehicle-card rounded-xl shadow-lg overflow-hidden">
+                                <img src="${v.imagens[0]}" class="vehicle-image" onerror="this.src='https://placehold.co/500x300?text=Sem+Imagem'">
+                                <div class="p-5">
+                                    <div class="flex justify-between items-start">
+                                        <h2 class="text-xl font-semibold">${v.nome}</h2>
+                                        <span class="px-2 py-1 rounded text-xs text-white ${getStatusColor(v.status)}">${v.status}</span>
+                                    </div>
+                                    <p class="text-gray-600">${v.marca} • ${v.ano} • ${v.km.toLocaleString()} km</p>
+                                    <p class="text-blue-600 text-2xl font-bold mt-2">${formatPrice(v.preco)}</p>
+                                    <div class="mt-4 flex gap-2">
+                                        <button onclick="window.viewDetail(${v.id})" class="flex-1 bg-blue-500 text-white py-2 rounded hover:bg-blue-600 transition">Detalhes</button>
+                                        ${v.status === 'disponível' ? `<button onclick="handleContact(${JSON.stringify(v).replace(/"/g, '&quot;')})" class="flex-1 bg-green-500 text-white py-2 rounded hover:bg-green-600 transition">Comprar</button>` : ''}
+                                    </div>
+                                </div>
+                            </div>
+                        `).join('')}
+                    </div>
+                    ${filtered.length === 0 ? '<div class="text-center py-12"><p>Nenhum veículo encontrado com os filtros selecionados.</p></div>' : ''}
+                </div>
+            `;
+        }
+        else if (currentPage === 'detail' && selectedVehicle) {
+            html += `
+                <div class="container mx-auto px-4 py-8">
+                    <button onclick="window.changePage('vehicles')" class="text-blue-500 hover:underline mb-4 inline-block">← Voltar</button>
+                    <div class="bg-white rounded-xl shadow-lg overflow-hidden">
+                        <img src="${selectedVehicle.imagens[currentImageIndex]}" class="gallery-image w-full" onerror="this.src='https://placehold.co/800x450?text=Sem+Imagem'">
+                        <div class="flex gap-2 p-4 overflow-x-auto">
+                            ${selectedVehicle.imagens.map((img, i) => `
+                                <img src="${img}" class="thumbnail ${currentImageIndex === i ? 'active' : ''}" onclick="window.setImageIndex(${i})" onerror="this.src='https://placehold.co/80x80'">
+                            `).join('')}
+                        </div>
+                        <div class="p-8">
+                            <div class="flex justify-between items-start">
+                                <h1 class="text-3xl font-bold">${selectedVehicle.nome}</h1>
+                                <span class="px-3 py-1 rounded text-white ${getStatusColor(selectedVehicle.status)}">${selectedVehicle.status}</span>
+                            </div>
+                            <p class="text-blue-600 text-4xl font-bold mt-4">${formatPrice(selectedVehicle.preco)}</p>
+                            <div class="grid md:grid-cols-2 gap-8 mt-8">
+                                <div>
+                                    <h2 class="text-xl font-semibold mb-4">Especificações</h2>
+                                    <div class="space-y-2">
+                                        <p><strong>Marca:</strong> ${selectedVehicle.marca}</p>
+                                        <p><strong>Ano:</strong> ${selectedVehicle.ano}</p>
+                                        <p><strong>Quilometragem:</strong> ${selectedVehicle.km.toLocaleString()} km</p>
+                                        <p><strong>Combustível:</strong> ${selectedVehicle.combustivel}</p>
+                                        <p><strong>Câmbio:</strong> ${selectedVehicle.cambio}</p>
+                                        <p><strong>Cor:</strong> ${selectedVehicle.cor}</p>
+                                    </div>
+                                </div>
+                                <div>
+                                    <h2 class="text-xl font-semibold mb-4">Descrição</h2>
+                                    <p>${selectedVehicle.descricao}</p>
+                                </div>
+                            </div>
+                            <button onclick="handleContact(${JSON.stringify(selectedVehicle).replace(/"/g, '&quot;')})" class="w-full mt-8 bg-green-500 text-white py-4 rounded-lg font-semibold text-lg hover:bg-green-600 transition">
+                                Tenho Interesse
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+        else if (currentPage === 'admin' && isAdmin) {
+            html += `
+                <div class="container mx-auto px-4 py-8">
+                    <div class="flex justify-between items-center mb-8">
+                        <h1 class="text-3xl font-bold">Painel Administrativo</h1>
+                        <button onclick="window.openVehicleModal()" class="bg-green-500 text-white px-6 py-2 rounded-lg hover:bg-green-600 transition">
+                            + Novo Veículo
+                        </button>
+                    </div>
+                    <div class="bg-white rounded-xl shadow-lg overflow-hidden">
+                        <div class="overflow-x-auto">
+                            <table class="w-full">
+                                <thead class="bg-gray-100">
+                                    <tr><th class="px-4 py-3 text-left">ID</th><th class="px-4 py-3 text-left">Imagem</th><th class="px-4 py-3 text-left">Veículo</th><th class="px-4 py-3 text-left">Preço</th><th class="px-4 py-3 text-left">Status</th><th class="px-4 py-3 text-left">Fotos</th><th class="px-4 py-3 text-left">Ações</th></tr>
+                                </thead>
+                                <tbody>
+                                    ${vehicles.map(v => `
+                                        <tr class="border-t">
+                                            <td class="px-4 py-3">${v.id}</td>
+                                            <td class="px-4 py-3"><img src="${v.imagens[0]}" class="w-12 h-12 object-cover rounded"></td>
+                                            <td class="px-4 py-3"><div class="font-bold">${v.nome}</div><div class="text-sm text-gray-600">${v.marca} ${v.ano}</div></td>
+                                            <td class="px-4 py-3 font-semibold">${formatPrice(v.preco)}</td>
+                                            <td class="px-4 py-3">
+                                                <select onchange="window.updateStatus(${v.id}, this.value)" class="border rounded px-2 py-1">
+                                                    <option ${v.status === 'disponível' ? 'selected' : ''}>disponível</option>
+                                                    <option ${v.status === 'reservado' ? 'selected' : ''}>reservado</option>
+                                                    <option ${v.status === 'vendido' ? 'selected' : ''}>vendido</option>
+                                                </select>
+                                            </td>
+                                            <td class="px-4 py-3">📸 ${v.imagens.length}</td>
+                                            <td class="px-4 py-3">
+                                                <button onclick="window.editVehicle(${v.id})" class="text-blue-600 mr-3">Editar</button>
+                                                <button onclick="handleDeleteVehicle(${v.id})" class="text-red-600">Excluir</button>
+                                            </td>
+                                        </tr>
+                                    `).join('')}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+        
+        html += `</div><footer class="bg-gray-800 text-white py-6 text-center"><p>© 2024 JM Veículos - Potência, estilo e confiança na sua garagem</p></footer></div>`;
+        
+        if (showLoginModal) {
+            html += `
+                <div class="modal-overlay" onclick="window.closeLogin()">
+                    <div class="modal-content" onclick="event.stopPropagation()">
+                        <h2 class="text-2xl font-bold mb-4">Área Administrativa</h2>
+                        <form onsubmit="window.submitLogin(event)">
+                            <input type="email" id="loginEmail" placeholder="E-mail" class="w-full px-3 py-2 border rounded mb-3" required>
+                            <input type="password" id="loginPass" placeholder="Senha" class="w-full px-3 py-2 border rounded mb-3" required>
+                            <button type="submit" class="w-full bg-blue-500 text-white py-2 rounded hover:bg-blue-600">Entrar</button>
+                            <button type="button" onclick="window.closeLogin()" class="w-full mt-2 bg-gray-500 text-white py-2 rounded hover:bg-gray-600">Cancelar</button>
+                        </form>
+                    </div>
+                </div>
+            `;
+        }
+        
+        if (showVehicleModal) {
+            const v = editingVehicle || { nome: '', marca: MARCAS[0], ano: 2024, preco: 0, km: 0, combustivel: 'Flex', cambio: 'Manual', cor: '', descricao: '', imagens: [] };
+            html += `
+                <div class="modal-overlay" onclick="window.closeVehicleModal()">
+                    <div class="modal-content" onclick="event.stopPropagation()">
+                        <h2 class="text-2xl font-bold mb-4">${editingVehicle ? 'Editar Veículo' : 'Novo Veículo'}</h2>
+                        <form onsubmit="window.submitVehicle(event)">
+                            <input type="text" id="nome" placeholder="Nome do veículo" value="${v.nome}" class="w-full px-3 py-2 border rounded mb-3" required>
+                            <select id="marca" class="w-full px-3 py-2 border rounded mb-3">${MARCAS.map(m => `<option ${v.marca === m ? 'selected' : ''}>${m}</option>`).join('')}</select>
+                            <div class="grid grid-cols-2 gap-3 mb-3">
+                                <input type="number" id="ano" placeholder="Ano" value="${v.ano}" class="px-3 py-2 border rounded" required>
+                                <input type="number" id="preco" placeholder="Preço" value="${v.preco}" class="px-3 py-2 border rounded" required>
+                                <input type="number" id="km" placeholder="Quilometragem" value="${v.km}" class="px-3 py-2 border rounded" required>
+                                <input type="text" id="cor" placeholder="Cor" value="${v.cor}" class="px-3 py-2 border rounded" required>
+                            </div>
+                            <select id="combustivel" class="w-full px-3 py-2 border rounded mb-3"><option ${v.combustivel === 'Flex' ? 'selected' : ''}>Flex</option><option ${v.combustivel === 'Gasolina' ? 'selected' : ''}>Gasolina</option><option ${v.combustivel === 'Diesel' ? 'selected' : ''}>Diesel</option><option ${v.combustivel === 'Etanol' ? 'selected' : ''}>Etanol</option></select>
+                            <select id="cambio" class="w-full px-3 py-2 border rounded mb-3"><option ${v.cambio === 'Manual' ? 'selected' : ''}>Manual</option><option ${v.cambio === 'Automático' ? 'selected' : ''}>Automático</option><option ${v.cambio === 'CVT' ? 'selected' : ''}>CVT</option></select>
+                            <textarea id="descricao" placeholder="Descrição completa" rows="3" class="w-full px-3 py-2 border rounded mb-3" required>${v.descricao}</textarea>
+                            <div class="mb-3">
+                                <label class="block text-sm font-medium mb-2">Fotos do Veículo</label>
+                                <div id="imagePreview" class="gallery-preview">${v.imagens.map(img => `<div class="gallery-item"><img src="${img}" class="preview-image"><div class="remove-image-btn" onclick="this.parentElement.remove()">×</div></div>`).join('')}</div>
+                                <input type="file" id="vehicleImages" accept="image/*" multiple style="display:none">
+                                <button type="button" onclick="document.getElementById('vehicleImages').click()" class="add-image-btn">+ Adicionar Fotos</button>
+                            </div>
+                            <div class="flex gap-3 mt-4"><button type="submit" class="flex-1 bg-blue-500 text-white py-2 rounded">Salvar</button><button type="button" onclick="window.closeVehicleModal()" class="flex-1 bg-gray-500 text-white py-2 rounded">Cancelar</button></div>
+                        </form>
+                    </div>
+                </div>
+            `;
+        }
+        
+        if (toastMessage) {
+            html += `<div class="toast" style="background:${toastMessage.isError ? '#ef4444' : '#10b981'}">${toastMessage.text}</div>`;
+        }
+        
+        app.innerHTML = html;
+        
+        if (showVehicleModal) {
+            const uploadInput = document.getElementById('vehicleImages');
+            if (uploadInput) {
+                uploadInput.onchange = function(e) {
+                    if (e.target.files) {
+                        Array.from(e.target.files).forEach((file) => {
+                            const reader = new FileReader();
+                            reader.onload = (event) => {
+                                const previewDiv = document.getElementById('imagePreview');
+                                const imgDiv = document.createElement('div');
+                                imgDiv.className = 'gallery-item';
+                                imgDiv.innerHTML = `<img src="${event.target.result}" class="preview-image"><div class="remove-image-btn" onclick="this.parentElement.remove()">×</div>`;
+                                previewDiv.appendChild(imgDiv);
+                            };
+                            reader.readAsDataURL(file);
+                        });
+                    }
+                };
+            }
+        }
+    }
+    
+    // Funções globais
+    window.changePage = (page) => { currentPage = page; selectedVehicle = null; render(); };
+    window.viewDetail = (id) => { selectedVehicle = vehicles.find(v => v.id === id); currentImageIndex = 0; currentPage = 'detail'; render(); };
+    window.setImageIndex = (i) => { currentImageIndex = i; render(); };
+    window.updateStatus = (id, status) => { const v = vehicles.find(v => v.id === id); if (v) { v.status = status; saveData(); render(); showToast('Status atualizado!'); } };
+    window.showLogin = () => { showLoginModal = true; render(); };
+    window.closeLogin = () => { showLoginModal = false; render(); };
+    window.submitLogin = (e) => { e.preventDefault(); handleLogin(document.getElementById('loginEmail').value, document.getElementById('loginPass').value); };
+    window.openVehicleModal = () => { editingVehicle = null; showVehicleModal = true; render(); };
+    window.closeVehicleModal = () => { showVehicleModal = false; editingVehicle = null; render(); };
+    window.editVehicle = (id) => { editingVehicle = JSON.parse(JSON.stringify(vehicles.find(v => v.id === id))); showVehicleModal = true; render(); };
+    
+    window.submitVehicle = async (e) => {
+        e.preventDefault();
+        
+        const nome = document.getElementById('nome').value;
+        const marca = document.getElementById('marca').value;
+        const ano = parseInt(document.getElementById('ano').value);
+        const preco = parseInt(document.getElementById('preco').value);
+        const km = parseInt(document.getElementById('km').value);
+        const cor = document.getElementById('cor').value;
+        const combustivel = document.getElementById('combustivel').value;
+        const cambio = document.getElementById('cambio').value;
+        const descricao = document.getElementById('descricao').value;
+        
+        const previewDiv = document.getElementById('imagePreview');
+        const imagens = [];
+        if (previewDiv) {
+            const imgElements = previewDiv.querySelectorAll('.gallery-item img');
+            imgElements.forEach(img => { if (img.src) imagens.push(img.src); });
+        }
+        
+        if (editingVehicle) {
+            const index = vehicles.findIndex(v => v.id === editingVehicle.id);
+            if (index !== -1) {
+                vehicles[index] = { ...editingVehicle, nome, marca, ano, preco, km, cor, combustivel, cambio, descricao, imagens: imagens.length ? imagens : editingVehicle.imagens };
+                saveData();
+                showToast('Veículo atualizado com sucesso!');
+            }
+        } else {
+            const newVehicle = { id: Date.now(), nome, marca, ano, preco, km, cor, combustivel, cambio, descricao, status: 'disponível', imagens: imagens.length ? imagens : ['https://placehold.co/800x450?text=Sem+Imagem'] };
+            vehicles.push(newVehicle);
+            saveData();
+            showToast('Veículo adicionado com sucesso!');
+        }
+        showVehicleModal = false;
+        editingVehicle = null;
+        render();
+    };
+    
+    // Inicializar
+    loadData();
+    render();
+</script>
+</body>
+</html>
